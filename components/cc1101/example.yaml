@@ -1,1 +1,215 @@
-exampl 
+# https://github.com/esphome/esphome/pull/6300
+# Example config.yaml
+
+substitutions:
+  device_name: cc1101
+
+esphome:
+  name: ${device_name}
+
+esp32:
+  board: nodemcu-32s
+  variant: esp32
+  framework:
+    type: arduino
+#  framework:
+#    type: esp-idf
+#    version: recommended
+
+wifi:
+  ssid: !secret wifi_name
+  password: !secret wifi_pass
+
+logger:
+  level: DEBUG
+
+ota:
+  password: !secret every_password
+
+spi:
+  clk_pin: GPIO18
+  miso_pin: GPIO19
+  mosi_pin: GPIO23
+
+ cc1101:
+  id: transceiver
+  cs_pin: GPIO5
+  output_power: 11
+  tuner:
+    frequency: 433920
+    if_frequency: 153
+    bandwidth: 203
+    channel: 0
+    channel_spacing: 200
+    # fsk_deviation: 47.607
+    # msk_deviation: 0
+    symbol_rate: 5000
+    sync_mode: None
+    carrier_sense_above_threshold: true
+    modulation: ASK/OOK
+  # agc:    
+    # magn_target:
+    # max_lna_gain:
+    # max_dva_gain:
+    # carrier_sense_abs_thr:
+    # carrier_sense_rel_thr:
+    # lna_priority:
+    # filter_length_fsk_msk:
+    # filter_length_ask_ook:
+    # freeze:
+    # wait_time:
+    # hyst_level:
+  sensor:
+    chip_id:
+      name: Chip Id
+    rssi:
+      name: RSSI
+    lqi:
+      name: LQI
+    temperature:
+      name: Temperature
+
+number:
+  - platform: cc1101
+    output_power:
+      name: output_power
+    tuner:
+      frequency:
+        name: Tuner frequency
+      if_frequency:
+        name: Tuner if_frequency
+      bandwidth:
+        name: Tuner bandwidth
+      channel:
+        name: Tuner channel
+      channel_spacing:
+        name: Tuner channel_spacing
+      fsk_deviation:
+        name: Tuner fsk_deviation
+      msk_deviation:
+        name: Tuner msk_deviation
+      symbol_rate:
+        name: Tuner symbol_rate
+    agc:
+      carrier_sense_abs_thr:
+        name: AGC carrier_sense_abs_thr
+
+select:
+  - platform: cc1101
+    tuner:
+      sync_mode:
+        name: Tuner Sync Mode
+      modulation:
+        name: Tuner Modulation
+    agc:
+      magn_target:
+        name: AGC magn_target
+      max_lna_gain:
+        name: AGC max_lna_gain
+      max_dva_gain:
+        name: AGC max_dva_gain
+      carrier_sense_rel_thr:
+        name: AGC carrier_sense_rel_thr
+      filter_length_fsk_msk:
+        name: AGC filter_length_fsk_msk
+      filter_length_ask_ook:
+        name: AGC filter_length_ask_ook
+      freeze:
+        name: AGC freeze
+      wait_time:
+        name: AGC wait_time
+      hyst_level:
+        name: AGC hyst_level
+
+switch:
+  - platform: cc1101
+    tuner:
+      carrier_sense_above_threshold:
+        name: Tuner carrier_sense_above_threshold
+    agc:
+      lna_priority:
+        name: AGC lna_priority
+
+remote_transmitter:
+  pin: GPIO32  # GDO0
+  carrier_duty_percent: 100%
+  on_transmit:
+    then:
+      - cc1101.begin_tx: transceiver
+  on_complete:
+    then:
+      - cc1101.end_tx: transceiver
+
+remote_receiver:
+  pin: GPIO33  # GDO2
+  dump:
+    - rc_switch
+    # - raw
+  tolerance: 50%
+  buffer_size: 2kb
+  filter: 250us
+  idle: 10ms
+
+api:
+  services:
+    - service: 'remote_transmit'
+      variables:
+        code: string
+      then:
+        - remote_transmitter.transmit_cc1101:
+            code: !lambda 'return code.c_str();'
+            protocol:
+              pulse_length: 420
+              sync: [1,31]
+              zero: [1,3]
+              one: [3,1]
+              inverted: true
+            repeat:
+              times: 10
+
+#mqtt:
+#  on_json_message:
+#    topic: "${device_name}/remote_transmit"
+#    then:
+#      - remote_transmitter.transmit_cc1101:
+#          code: !lambda |-
+#            if(x.containsKey("code")) return x["code"];
+#            return "111111111111111111111111";
+#          protocol:
+#            pulse_length: 420
+#            sync: [1,31]
+#            zero: [1,3]
+#            one: [3,1]
+#            inverted: false
+#          repeat:
+#            times: 10
+#      - cc1101.end_tx: transceiver
+
+button:
+  - platform: template
+    name: "${device_name} gate"
+    on_press:
+      - remote_transmitter.transmit_cc1101:
+          code: '0111000110010011110110010100011111110001001011110111'
+          protocol:
+            pulse_length: 434
+            sync: [1,6]
+            zero: [1,2]
+            one: [2,1]
+            inverted: true
+          repeat:
+            times: 10
+
+binary_sensor:
+  - platform: remote_receiver
+    name: "${device_name} window"
+    rc_switch_raw:
+      code: '110111110001111011100110'
+      protocol:
+        pulse_length: 420
+        sync: [1,31]
+        zero: [1,3]
+        one: [3,1]
+        inverted: false
+    filters:
+      - delayed_off: 1000ms

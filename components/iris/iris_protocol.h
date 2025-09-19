@@ -21,16 +21,16 @@ class IrisProtocol : public Component {
 
  private:
   std::vector<int> get_data(int id0, int id1, int instruction, int mode) {
-    uint8_t DATA_TABLE[12]    = {0xAA,0xAA,0xAA,0xAA,0x2D,0xD4,0xF9,203,0x00,17,3,0x00};
+    uint8_t DATA_TABLE[12] = {0xAA,0xAA,0xAA,0xAA,0x2D,0xD4,0xF9,203,0x00,17,3,0x00};
     uint8_t DATACRC_TABLE[12] = {0};
 
-    // Fill dynamic fields
+    // fill dynamic fields
     DATA_TABLE[6]  = id0;
     DATA_TABLE[7]  = id1;
     DATA_TABLE[9]  = instruction;
     DATA_TABLE[10] = mode;
 
-    // Checksum (two's complement of sum index 4-10)
+    // checksum (two's complement sum 4-10)
     unsigned int sum = 0;
     for (int i = 4; i < 11; i++) sum += DATA_TABLE[i];
     DATA_TABLE[11] = static_cast<unsigned char>(-sum);
@@ -46,7 +46,7 @@ class IrisProtocol : public Component {
       }
     }
 
-    // Optional debug
+    // optional debug
     std::ostringstream oss;
     for (int i = 0; i < 12; i++) {
       oss << "0x" << std::hex << std::uppercase << static_cast<int>(DATACRC_TABLE[i]);

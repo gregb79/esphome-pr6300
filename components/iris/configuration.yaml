@@ -21,14 +21,14 @@ button:
   - platform: template
     name: "Default Iris"
     on_press:
-      - remote_transmitter.transmit_iris:   # defaults used automatically
+      - remote_transmitter.transmit_iris:   # uses defaults
 
   - platform: template
     name: "Blue Pool"
     on_press:
       - remote_transmitter.transmit_iris:
-          instruction: Blue
-          mode: pool
+          instruction: Blue      # VS Code will autocomplete
+          mode: pool             # autocomplete available
 
   - platform: template
     name: "Red Spa"

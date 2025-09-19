@@ -1,6 +1,5 @@
 #pragma once
 #include "esphome/core/automation.h"
-#include "esphome/components/remote_transmitter/remote_transmitter.h"
 #include "iris_protocol.h"
 
 namespace esphome {
@@ -8,7 +7,7 @@ namespace remote_transmitter {
 
 static const char *const TAG = "transmit_iris";
 
-// map instruction strings to code
+// Map instruction strings to code
 int map_instruction(const std::string &i) {
   if (i == "Power") return 17;
   if (i == "Blue") return 33;
@@ -26,7 +25,7 @@ int map_instruction(const std::string &i) {
   return 17;  // default Power
 }
 
-// map mode strings to code
+// Map mode strings to code
 int map_mode(const std::string &m) {
   if (m == "pool") return 1;
   if (m == "spa") return 2;
@@ -50,10 +49,11 @@ class TransmitIrisAction : public Action<> {
   }
 
  protected:
-  int id0_{249};      // default
-  int id1_{203};      // default
-  int mode_{3};       // default poolspa
-  int instr_{17};     // default Power
+  // Defaults
+  int id0_{249};
+  int id1_{203};
+  int mode_{3};       // poolspa
+  int instr_{17};     // Power
 
   IrisProtocol *proto_{nullptr};
 };

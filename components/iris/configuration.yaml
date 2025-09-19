@@ -1,0 +1,32 @@
+esphome:
+  includes:
+    - iris_protocol.h
+    - transmit_iris_action.h
+
+remote_transmitter:
+  id: tx
+  pin: GPIO32
+  carrier_duty_percent: 100%
+
+globals:
+  - id: iris
+    type: IrisProtocol*
+
+init:
+  - lambda: |-
+      auto iris_proto = new IrisProtocol();
+      iris_proto->set_parent(id(tx));
+      id(iris) = iris_proto;
+
+button:
+  - platform: template
+    name: "Default Iris"
+    on_press:
+      - remote_transmitter.transmit_iris:  # will use defaults: ID0=249, ID1=203, mode=poolspa, instruction=Power
+
+  - platform: template
+    name: "Blue Pool"
+    on_press:
+      - remote_transmitter.transmit_iris:
+          instruction: Blue
+          mode: pool

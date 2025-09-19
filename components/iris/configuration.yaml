@@ -1,7 +1,6 @@
-esphome:
-  includes:
-    - iris_protocol.h
-    - transmit_iris_action.h
+external_components:
+  - source: github://gregb79/esphome-pr6300@main
+    components: [cc1101, iris]
 
 remote_transmitter:
   id: tx
@@ -10,11 +9,11 @@ remote_transmitter:
 
 globals:
   - id: iris
-    type: IrisProtocol*
+    type: remote_transmitter::IrisProtocol*
 
 init:
   - lambda: |-
-      auto iris_proto = new IrisProtocol();
+      auto iris_proto = new remote_transmitter::IrisProtocol();
       iris_proto->set_parent(id(tx));
       id(iris) = iris_proto;
 
@@ -22,7 +21,7 @@ button:
   - platform: template
     name: "Default Iris"
     on_press:
-      - remote_transmitter.transmit_iris:  # will use defaults: ID0=249, ID1=203, mode=poolspa, instruction=Power
+      - remote_transmitter.transmit_iris:   # defaults used automatically
 
   - platform: template
     name: "Blue Pool"
@@ -30,3 +29,10 @@ button:
       - remote_transmitter.transmit_iris:
           instruction: Blue
           mode: pool
+
+  - platform: template
+    name: "Red Spa"
+    on_press:
+      - remote_transmitter.transmit_iris:
+          instruction: Red
+          mode: spa

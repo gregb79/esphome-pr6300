@@ -36,6 +36,8 @@ class CC1101Component : public PollingComponent,
   void begin_tx();
   void end_tx();
 
+  uint8_t get_gdo0_pin();
+
   CC1101_SUB_NUMBER(output_power, float)
   CC1101_SUB_SELECT(rx_attenuation, RxAttenuation)
   CC1101_SUB_SWITCH(dc_blocking_filter)

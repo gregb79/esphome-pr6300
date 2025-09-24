@@ -278,7 +278,9 @@ void CC1101Component::dump_config() {
   LOG_UPDATE_INTERVAL(this);
 }
 
-uint8_t CC1101Component::get_gdo0_pin() { return this->gdo0_pin_->get_pin(); }
+uint8_t CC1101Component::get_gdo0_pin() { 
+    return this->get_gdo0() ? this->get_gdo0()->get_pin() : 0; 
+}
 
 
 void CC1101Component::update() {

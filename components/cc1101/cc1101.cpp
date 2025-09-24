@@ -279,7 +279,7 @@ void CC1101Component::dump_config() {
 }
 
 uint8_t CC1101Component::get_gdo0_pin() { 
-    return this->get_gdo0() ? this->get_gdo0()->get_pin() : 0; 
+    return this->get_gdo0_pin_obj() ? this->get_gdo0_pin_obj()->get_pin() : 0; 
 }
 
 

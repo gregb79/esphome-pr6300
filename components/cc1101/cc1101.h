@@ -37,6 +37,7 @@ class CC1101Component : public PollingComponent,
   void end_tx();
 
   uint8_t get_gdo0_pin();
+  InternalGPIOPin *get_gdo0_pin_obj() { return this->gdo0_; }
 
   CC1101_SUB_NUMBER(output_power, float)
   CC1101_SUB_SELECT(rx_attenuation, RxAttenuation)
